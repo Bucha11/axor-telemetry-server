@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>axor — governance middleware for LangChain 1.0 agents</title>
+  <title>axor — governance kernel + adapters for AI agent systems</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Drop-in LangChain middleware that cuts 26% of input tokens via context compression, tool governance, and budget tracking. MIT, one line install.">
+  <meta name="description" content="Provider-agnostic governance for LLM agents: context compression, tool policy, token budgets. Works standalone, with LangChain, with Claude, from the terminal. MIT.">
 
-  <meta property="og:title" content="axor — governance middleware for LangChain 1.0">
-  <meta property="og:description" content="Drop-in middleware. Context compression · tool policy · budget tracking. −26% tokens on real benchmark.">
+  <meta property="og:title" content="axor — governance kernel + adapters for AI agent systems">
+  <meta property="og:description" content="Context compression · tool policy · token budgets · opt-in telemetry. Standalone kernel, LangChain middleware, Claude adapter, CLI.">
   <meta property="og:url" content="https://useaxor.net/">
   <meta name="twitter:card" content="summary">
 
@@ -62,18 +62,29 @@
       padding-right: 0.35em;       /* counter letter-spacing on the last char */
     }
 
-    .underline {
+    .kicker {
       color: var(--accent-3);
-      font-size: 0.88rem;
-      letter-spacing: 0.05em;
-      margin-top: 0.45rem;
-      user-select: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.8rem;
+    }
+    .kicker::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid var(--rule);
+      transform: translateY(-0.2em);
     }
 
     .subtitle {
       color: var(--muted);
       font-size: 1rem;
-      margin-top: 0.9rem;
+      margin-top: 1.1rem;
+      max-width: 52ch;
     }
 
     .tagline {
@@ -275,13 +286,18 @@
 <body>
 
   <header class="hero">
+    <div class="kicker">governance toolkit for AI agents</div>
     <div class="logo">AXOR</div>
-    <div class="underline">▆ ▆ ▆ ▆ ▁ ▁ ▁ ▁ ▁ ▁ ▁ ▁ ▁</div>
-    <p class="subtitle">governance middleware for LangChain 1.0 agents.</p>
+    <p class="subtitle">
+      A provider-agnostic governance kernel with adapters for
+      LangChain, Claude, and your own stack. Context compression ·
+      tool allow/deny policy · token budgets · opt-in telemetry.
+    </p>
 
     <p class="tagline">
-      Context compression · tool allow/deny policy · token budgets ·
-      anonymous opt-in telemetry. One middleware class, no graph changes.
+      Use it as a LangChain 1.0 middleware, a Claude adapter, a
+      standalone SDK, or a terminal command. Same governance model
+      across all four.
     </p>
 
     <div class="prompt">
