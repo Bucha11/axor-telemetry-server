@@ -25,9 +25,14 @@ async def client(monkeypatch):
 
         async def fetchrow(self, _):
             return {
-                "n_records": 0, "n_contributors": 0,
-                "top_signal": None, "top_signal_n": 0, "n_adjusted": 0,
+                "n_all": 0, "n_month": 0, "n_day": 0,
+                "n_contributors_month": 0, "n_contributors_day": 0,
+                "n_adjusted_month": 0, "avg_conf_month": 0.0,
+                "latest_version": None,
             }
+
+        async def fetch(self, _):
+            return []
 
     fake = FakePool()
 
@@ -40,7 +45,7 @@ async def client(monkeypatch):
     monkeypatch.setattr(m, "close_pool", lambda: None)
 
     from app import stats as s
-    monkeypatch.setattr(s, "_cache", {"t": 0.0, "html": ""})
+    s._reset_cache_for_tests()
 
     async with AsyncClient(transport=ASGITransport(app=m.app), base_url="http://t") as c:
         yield c
@@ -98,8 +103,12 @@ async def test_rejects_oversized_batch(client):
     assert r.status_code == 413
 
 
-async def test_stats_renders(client):
+async def test_stats_renders_empty_db(client):
     r = await client.get("/stats")
     assert r.status_code == 200
-    assert "Axor telemetry" in r.text
-    assert "Records this month" in r.text
+    assert "Axor community telemetry" in r.text
+    # empty db → chart placeholder message present
+    assert "No signals recorded yet" in r.text
+    # Contract + changelog links always present
+    assert "Heuristic changelog" in r.text
+    assert "Data contract" in r.text
