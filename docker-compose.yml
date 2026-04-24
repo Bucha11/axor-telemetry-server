@@ -53,9 +53,11 @@ services:
     environment:
       TELEMETRY_DOMAIN: ${TELEMETRY_DOMAIN}
       GRAFANA_DOMAIN: ${GRAFANA_DOMAIN}
+      LANDING_DOMAIN: ${LANDING_DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./landing:/srv/landing:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

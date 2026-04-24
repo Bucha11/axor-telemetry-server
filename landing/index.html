@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>axor — governance middleware for LangChain 1.0 agents</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Drop-in LangChain middleware that cuts 26% of input tokens via context compression, tool governance, and budget tracking. MIT, one line install.">
+
+  <!-- Social share -->
+  <meta property="og:title" content="axor — governance middleware for LangChain 1.0">
+  <meta property="og:description" content="Drop-in middleware. Context compression · tool policy · budget tracking. −26% tokens on real benchmark.">
+  <meta property="og:url" content="https://useaxor.net/">
+  <meta name="twitter:card" content="summary">
+
+  <style>
+    /* ── Reset + base ───────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #f5f0e1;   /* parchment */
+      --text:   #2b2724;   /* near-black with warmth */
+      --muted:  #6b6357;
+      --accent: #8b3a1f;   /* burnt sienna */
+      --rule:   #d9d0ba;
+      --code-bg:#e8dfc9;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: "IBM Plex Mono", "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 2.5rem 1.4rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { background: var(--accent); color: var(--bg); text-decoration: none; }
+
+    code { background: var(--code-bg); padding: 0.1rem 0.4rem; border-radius: 2px; font-size: 0.93em; }
+    pre  { background: var(--code-bg); padding: 1rem 1.2rem; border-left: 3px solid var(--accent);
+           overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+    pre code { background: transparent; padding: 0; }
+
+    h1 { font-size: 2rem; letter-spacing: -0.02em; font-weight: 700; margin-bottom: 0.3rem; }
+    h2 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.15em;
+         color: var(--muted); margin: 2.8rem 0 0.7rem; font-weight: 600; }
+
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 1.8rem; }
+    .tagline  { font-size: 1.05rem; margin: 1.1rem 0 0.8rem; }
+
+    hr { border: none; border-top: 1px dashed var(--rule); margin: 2rem 0; }
+
+    /* ── Packages table ─────────────────────────────────────────────── */
+    .pkg { display: grid; grid-template-columns: 190px 1fr; gap: 1.2rem;
+           padding: 0.45rem 0; border-bottom: 1px dotted var(--rule); }
+    .pkg:last-child { border-bottom: none; }
+    .pkg .name { font-weight: 600; color: var(--accent); }
+    .pkg .desc { color: var(--text); }
+    .pkg .meta { grid-column: 2; color: var(--muted); font-size: 0.85rem; margin-top: 0.15rem; }
+    @media (max-width: 520px) {
+      .pkg { grid-template-columns: 1fr; gap: 0.2rem; }
+      .pkg .meta { grid-column: 1; }
+    }
+
+    /* ── Demo embed ─────────────────────────────────────────────────── */
+    .demo { margin: 1rem 0 0.5rem; }
+    .demo img { width: 100%; height: auto; display: block;
+                border: 1px solid var(--rule); border-radius: 2px; }
+
+    /* ── Primary CTA ────────────────────────────────────────────────── */
+    .cta {
+      display: inline-block;
+      background: var(--text);
+      color: var(--bg);
+      padding: 0.55rem 1.1rem;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 2px;
+      margin-top: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+    .cta:hover { background: var(--accent); color: var(--bg); }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px dashed var(--rule);
+             font-size: 0.85rem; color: var(--muted); }
+    footer .row { display: flex; flex-wrap: wrap; gap: 1.4rem; justify-content: space-between;
+                  align-items: baseline; }
+    footer .row:first-child { margin-bottom: 0.4rem; }
+
+    /* Small stat block */
+    .stat { border: 1px dashed var(--rule); padding: 0.9rem 1.1rem; margin: 1.4rem 0;
+            background: transparent; }
+    .stat .label { font-size: 0.78rem; color: var(--muted);
+                   text-transform: uppercase; letter-spacing: 0.1em; }
+    .stat .num { font-size: 1.4rem; font-weight: 600; margin-top: 0.1rem; }
+    .stat .fine { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>axor</h1>
+    <p class="subtitle">governance middleware for LangChain 1.0 agents</p>
+
+    <p class="tagline">
+      Context compression · tool allow/deny policy · token budgets · anonymous
+      opt-in telemetry. One middleware class, no graph changes.
+    </p>
+
+    <pre><code>pip install axor-langchain</code></pre>
+
+    <a class="cta" href="https://github.com/Bucha11/axor-langchain">View on GitHub →</a>
+  </header>
+
+
+  <h2>Benchmark</h2>
+  <div class="stat">
+    <div class="label">3-node research pipeline · 8 turns · real API calls</div>
+    <div class="num">−26.2% input tokens</div>
+    <div class="fine">claude-sonnet-4-6 · <code>benchmark/live_graph.py</code> · reproducible</div>
+  </div>
+
+
+  <h2>Packages</h2>
+  <div class="pkg">
+    <div class="name">axor-langchain</div>
+    <div class="desc">
+      LC 1.0 <code>AgentMiddleware</code> — compression, tool governance, budgets.
+    </div>
+    <div class="meta">
+      <a href="https://pypi.org/project/axor-langchain/">PyPI</a> ·
+      <a href="https://github.com/Bucha11/axor-langchain">repo</a>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="name">axor-core</div>
+    <div class="desc">
+      Provider-agnostic governance kernel. Policy engine, context shaping,
+      federated child spawning. Zero runtime deps.
+    </div>
+    <div class="meta">
+      <a href="https://pypi.org/project/axor-core/">PyPI</a> ·
+      <a href="https://github.com/Bucha11/axor-core">repo</a>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="name">axor-cli</div>
+    <div class="desc">
+      <code>axor</code> command — governed agent sessions from your terminal,
+      Claude / OpenAI adapters.
+    </div>
+    <div class="meta">
+      <a href="https://pypi.org/project/axor-cli/">PyPI</a> ·
+      <a href="https://github.com/Bucha11/axor-cli">repo</a>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="name">axor-telemetry</div>
+    <div class="desc">
+      Anonymous opt-in pipeline. MinHash fingerprint only, no raw input ever.
+    </div>
+    <div class="meta">
+      <a href="https://pypi.org/project/axor-telemetry/">PyPI</a> ·
+      <a href="https://github.com/Bucha11/axor-telemetry">repo</a>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="name">axor-claude</div>
+    <div class="desc">Claude Code adapter for axor-core.</div>
+    <div class="meta">
+      <a href="https://github.com/Bucha11/axor-claude">repo</a>
+    </div>
+  </div>
+
+  <div class="pkg">
+    <div class="name">axor-memory-sqlite</div>
+    <div class="desc">SQLite-backed cross-session memory provider.</div>
+    <div class="meta">
+      <a href="https://github.com/Bucha11/axor-memory-sqlite">repo</a>
+    </div>
+  </div>
+
+
+  <h2>Demo</h2>
+  <p style="margin-bottom:0.8rem;color:var(--muted);font-size:0.9rem">
+    A 60-second walkthrough — install, plug in the middleware, watch
+    turn-by-turn compression cap token growth.
+  </p>
+  <div class="demo">
+    <img src="demo.svg" alt="axor-langchain asciinema demo"/>
+  </div>
+
+
+  <h2>Community</h2>
+  <ul style="list-style:none; padding:0;">
+    <li>&rsaquo;&nbsp; Live telemetry aggregates: <a href="https://telemetry.useaxor.net/stats">telemetry.useaxor.net/stats</a></li>
+    <li>&rsaquo;&nbsp; Heuristic classifier changelog: <a href="https://github.com/Bucha11/axor-core/blob/main/heuristic-changelog.md">axor-core/heuristic-changelog.md</a></li>
+    <li>&rsaquo;&nbsp; Issues &amp; discussions: on each repo, above</li>
+  </ul>
+
+
+  <footer>
+    <div class="row">
+      <span>MIT · <a href="https://github.com/Bucha11">github.com/Bucha11</a></span>
+      <span><a href="mailto:hello@useaxor.net">hello@useaxor.net</a></span>
+    </div>
+    <div class="row">
+      <span>No tracking, no JS on this page · opt-in telemetry is explicitly gated</span>
+    </div>
+  </footer>
+
+</body>
+</html>

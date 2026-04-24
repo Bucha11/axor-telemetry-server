@@ -12,3 +12,14 @@
     encode zstd gzip
     reverse_proxy grafana:3000
 }
+
+# Apex + www serve the landing page. Caddy auto-redirects www → apex.
+{$LANDING_DOMAIN}, www.{$LANDING_DOMAIN} {
+    encode zstd gzip
+    root * /srv/landing
+    file_server
+    # Cache static assets aggressively; edit-deploy cycle invalidates via
+    # docker compose up — browsers refetch on the new container build.
+    @assets path *.svg *.png *.ico *.css *.js
+    header @assets Cache-Control "public, max-age=86400"
+}
