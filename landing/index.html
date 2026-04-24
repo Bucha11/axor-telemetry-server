@@ -98,11 +98,15 @@
       background: var(--bg-tint);
       padding: 0.9rem 1.2rem;
       border-left: 3px solid var(--accent);
-      font-size: 0.95rem;
+      font-size: 0.94rem;
       margin: 1rem 0;
       color: var(--ink);
+      overflow-x: auto;
     }
-    .prompt .dollar { color: var(--accent-3); margin-right: 0.5em; user-select: none; }
+    .prompt .line { display: block; white-space: pre; }
+    .prompt .line + .line { margin-top: 0.25rem; }
+    .prompt .dollar { color: var(--accent-3); user-select: none; }
+    .prompt .note   { color: var(--muted); }
     .prompt .caret {
       display: inline-block;
       width: 0.55em;
@@ -301,7 +305,9 @@
     </p>
 
     <div class="prompt">
-      <span class="dollar">$</span>pip install axor-langchain<span class="caret"></span>
+      <span class="line"><span class="dollar">$ </span>pip install axor-langchain   <span class="note"># LangChain 1.0 middleware</span><span class="caret"></span></span>
+      <span class="line"><span class="dollar">$ </span>pip install axor-core        <span class="note"># provider-agnostic kernel</span></span>
+      <span class="line"><span class="dollar">$ </span>pip install axor-cli         <span class="note"># governed sessions in your terminal</span></span>
     </div>
 
     <a class="cta" href="https://github.com/Bucha11/axor-langchain">View on GitHub →</a>
