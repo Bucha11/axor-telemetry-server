@@ -1,0 +1,289 @@
+{
+  "uid": "axor-telemetry",
+  "title": "Axor Telemetry",
+  "tags": ["axor", "telemetry"],
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "1m",
+  "time": {"from": "now-7d", "to": "now"},
+  "timepicker": {},
+  "templating": {"list": []},
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Records (total)",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS value FROM records;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Records (last 24h)",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS value FROM records WHERE received_at > now() - interval '24 hours';"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Avg confidence (24h)",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coalesce(avg((payload->>'confidence')::float), 0) AS value FROM records WHERE received_at > now() - interval '24 hours';"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red",    "value": null},
+              {"color": "orange", "value": 0.5},
+              {"color": "green",  "value": 0.75}
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Policy-adjusted rate (24h)",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coalesce(avg(((payload->>'policy_adjusted')::boolean)::int::float), 0) AS value FROM records WHERE received_at > now() - interval '24 hours';"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green",  "value": null},
+              {"color": "orange", "value": 0.15},
+              {"color": "red",    "value": 0.3}
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Ingest rate (per hour)",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 4},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(received_at, '1h') AS time, count(*) AS records FROM records WHERE $__timeFilter(received_at) GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "barAlignment": 0
+          }
+        }
+      },
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      }
+    },
+    {
+      "id": 6,
+      "type": "barchart",
+      "title": "Signal distribution",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT payload->>'signal_chosen' AS signal, count(*) AS records FROM records WHERE $__timeFilter(received_at) GROUP BY 1 ORDER BY records DESC LIMIT 20;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {"fillOpacity": 80, "lineWidth": 1}
+        }
+      },
+      "options": {
+        "orientation": "horizontal",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 100,
+        "showValue": "auto",
+        "stacking": "none",
+        "legend": {"displayMode": "hidden", "placement": "bottom"},
+        "xField": "signal"
+      }
+    },
+    {
+      "id": 7,
+      "type": "piechart",
+      "title": "Classifier used",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT payload->>'classifier_used' AS classifier, count(*) AS records FROM records WHERE $__timeFilter(received_at) GROUP BY 1 ORDER BY records DESC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short"}
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["sum"], "fields": "/^records$/", "values": false},
+        "pieType": "donut",
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+        "displayLabels": ["percent"]
+      }
+    },
+    {
+      "id": 8,
+      "type": "barchart",
+      "title": "Policy-adjusted rate by signal",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT payload->>'signal_chosen' AS signal, avg(((payload->>'policy_adjusted')::boolean)::int::float) AS adjust_rate FROM records WHERE $__timeFilter(received_at) GROUP BY 1 HAVING count(*) >= 5 ORDER BY adjust_rate DESC LIMIT 15;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "custom": {"fillOpacity": 80}
+        }
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "legend": {"displayMode": "hidden"},
+        "xField": "signal"
+      }
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Client versions",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "datasource": {"type": "postgres", "uid": "axor-telemetry"},
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT axor_version, count(*) AS records, max(received_at) AS last_seen FROM records WHERE $__timeFilter(received_at) GROUP BY axor_version ORDER BY records DESC;"
+        }
+      ],
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [{"displayName": "records", "desc": true}]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"align": "auto", "filterable": true}
+        }
+      }
+    }
+  ]
+}
