@@ -116,10 +116,12 @@ _TEMPLATE = """<!doctype html>
 
     .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.9rem; }}
     .card {{ background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
-             padding: 0.9rem 1.1rem; }}
+             padding: 0.9rem 1.1rem; min-width: 0; overflow: hidden; }}
     .card .label {{ font-size: 0.78rem; color: var(--muted);
                     text-transform: uppercase; letter-spacing: 0.04em; }}
-    .card .big {{ font-size: 1.6rem; font-weight: 600; margin-top: 0.2rem; line-height: 1.1; }}
+    .card .big {{ font-size: 1.6rem; font-weight: 600; margin-top: 0.2rem; line-height: 1.15;
+                  overflow-wrap: anywhere; word-break: break-word; }}
+    .card .big.long {{ font-size: clamp(0.95rem, 2.4vw, 1.25rem); }}
     .card .sub {{ font-size: 0.85rem; color: var(--muted); margin-top: 0.1rem; }}
 
     #signal-chart {{ width: 100%; height: 340px; }}
@@ -164,7 +166,7 @@ _TEMPLATE = """<!doctype html>
     </div>
     <div class="card">
       <div class="label">Top signal</div>
-      <div class="big">{top_signal}</div>
+      <div class="big long">{top_signal}</div>
       <div class="sub">{top_signal_pct:.1f}% of tasks</div>
     </div>
     <div class="card">
