@@ -37,9 +37,74 @@ pytest tests/ -v
 
 ## Production deploy (Hetzner CX22)
 
-1. Point DNS A-records `telemetry.$DOMAIN` and `grafana.$DOMAIN` at the VPS IP.
-2. Copy `.env.example` to `.env`, set strong passwords and real domain.
-3. `docker compose up -d`. Caddy auto-provisions TLS via Let's Encrypt.
+### One-time server prep
+
+SSH in as `root` (or a sudoer) and run:
+
+```bash
+apt update && apt upgrade -y
+apt install -y fail2ban ufw
+curl -fsSL https://get.docker.com | sh
+ufw allow 22/tcp && ufw allow 80/tcp && ufw allow 443/tcp
+ufw --force enable
+```
+
+### Local prep
+
+```bash
+cp .env.example .env
+# Edit .env:
+#   POSTGRES_PASSWORD=$(openssl rand -hex 32)
+#   GRAFANA_ADMIN_PASSWORD=$(openssl rand -hex 16)
+#   TELEMETRY_DOMAIN=telemetry.useaxor.net
+#   GRAFANA_DOMAIN=grafana.useaxor.net
+#   ACME_EMAIL=you@example.com
+```
+
+### DNS (before deploy — Caddy's ACME needs it)
+
+In your DNS provider, add A-records pointing at the VPS IP:
+
+| Name         | Type | Value            | Proxy |
+|--------------|------|------------------|-------|
+| `telemetry`  | A    | `<your VPS IP>`  | off   |
+| `grafana`    | A    | `<your VPS IP>`  | off   |
+
+If you're behind Cloudflare, keep proxy OFF (gray cloud) so Caddy can
+complete the Let's Encrypt HTTP-01 challenge.
+
+### Deploy
+
+```bash
+SERVER=root@<your VPS IP> ./deploy.sh
+```
+
+The script rsyncs the repo to `/srv/axor-telemetry` on the server, pulls
+images, builds the api, and brings up the stack. Caddy requests TLS certs
+on first boot — watch the caddy container logs if something goes wrong.
+
+### Verify
+
+```bash
+curl -sSf https://telemetry.useaxor.net/healthz
+# → "ok"
+```
+
+Grafana:
+
+```
+https://grafana.useaxor.net/
+# user: admin
+# pass: the GRAFANA_ADMIN_PASSWORD you set in .env
+```
+
+### Other commands
+
+```bash
+SERVER=root@<ip> ./deploy.sh logs     # tail api + caddy logs
+SERVER=root@<ip> ./deploy.sh ps       # container status
+SERVER=root@<ip> ./deploy.sh down     # stop the stack (keeps volumes)
+```
 
 ## What's stored, what isn't
 
