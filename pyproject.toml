@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "axor-telemetry-server"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ingest endpoint + public stats page for axor anonymized telemetry"
 readme = "README.md"
 license = { text = "MIT" }

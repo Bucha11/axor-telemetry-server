@@ -112,3 +112,35 @@ async def test_stats_renders_empty_db(client):
     # Contract + changelog links always present
     assert "Heuristic changelog" in r.text
     assert "Data contract" in r.text
+
+
+async def test_ingest_token_required_when_set(client, monkeypatch):
+    monkeypatch.setenv("INGEST_SHARED_SECRET", "s3cret")
+    payload = [{
+        "signal_chosen": "x",
+        "classifier_used": "heuristic",
+        "confidence": 0.5,
+        "tokens_spent": 1,
+        "policy_adjusted": False,
+    }]
+    r = await client.post("/v1/records", json=payload)
+    assert r.status_code == 401
+
+    r = await client.post("/v1/records", json=payload, headers={"X-Axor-Token": "wrong"})
+    assert r.status_code == 401
+
+    r = await client.post("/v1/records", json=payload, headers={"X-Axor-Token": "s3cret"})
+    assert r.status_code == 200
+
+
+async def test_ingest_open_when_secret_unset(client, monkeypatch):
+    monkeypatch.delenv("INGEST_SHARED_SECRET", raising=False)
+    payload = [{
+        "signal_chosen": "x",
+        "classifier_used": "heuristic",
+        "confidence": 0.5,
+        "tokens_spent": 1,
+        "policy_adjusted": False,
+    }]
+    r = await client.post("/v1/records", json=payload)
+    assert r.status_code == 200

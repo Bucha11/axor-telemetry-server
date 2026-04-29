@@ -20,6 +20,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://axor:${POSTGRES_PASSWORD}@postgres:5432/axor_telemetry
+      INGEST_SHARED_SECRET: ${INGEST_SHARED_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy
